@@ -99,8 +99,12 @@ async def process_top(message: types.Message, command: Command.CommandObj):
     dataset = pandas.read_csv('games.csv')[['player', 'score']]
     dataset = dataset.groupby('player')[['score']]\
         .agg(sum)\
-        .sort_values('score')\
-        .head(int(command.args) if command.args is not None else 10)
+        .sort_values('score')
+    if command.args != 'all':
+        try:
+            dataset = dataset.head(int(command.args) if command.args is not None else 10)
+        except ValueError:
+            await message.answer("Я не понимаю, сколько игроков вы хотите увидеть, выведу всех.")
     dataset['player'] = dataset.index
     dataset['number'] = list(range(1, dataset.count()['player'] + 1))
     await message.answer('`' + str(dataset.rename(index=dataset['number']).rename_axis(None)[['player', 'score']]
